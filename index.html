@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <title>XL Nice Number Scanner</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <style>
+    body {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+      background: #111827;
+      color: #e5e7eb;
+      margin: 0;
+      padding: 16px;
+    }
+    h1 {
+      font-size: 20px;
+      margin-bottom: 4px;
+    }
+    .small { font-size: 12px; color: #9ca3af; }
+    textarea {
+      width: 100%;
+      min-height: 180px;
+      padding: 8px;
+      border-radius: 6px;
+      border: 1px solid #374151;
+      background: #020617;
+      color: #e5e7eb;
+      font-size: 12px;
+    }
+    .panel {
+      margin-top: 12px;
+      padding: 10px;
+      border-radius: 8px;
+      background: #020617;
+      border: 1px solid #1f2933;
+    }
+    label { font-size: 12px; }
+    .flex { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+    .chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 4px 8px;
+      border-radius: 9999px;
+      border: 1px solid #4b5563;
+      font-size: 11px;
+    }
+    button {
+      padding: 6px 10px;
+      border-radius: 6px;
+      border: none;
+      background: #2563eb;
+      color: white;
+      font-size: 13px;
+      cursor: pointer;
+    }
+    button.secondary {
+      background: #374151;
+    }
+    button:disabled {
+      opacity: 0.5;
+      cursor: default;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 8px;
+      font-size: 12px;
+    }
+    th, td {
+      padding: 6px;
+      border-bottom: 1px solid #1f2937;
+    }
+    th {
+      text-align: left;
+      background: #020617;
+      position: sticky;
+      top: 0;
+      z-index: 1;
+    }
+    tr:hover td {
+      background: #111827;
+    }
+    .badge {
+      display: inline-block;
+      padding: 1px 6px;
+      border-radius: 9999px;
+      background: #1f2937;
+      font-size: 10px;
+    }
+    .copy-hint {
+      font-size: 11px;
+      color: #9ca3af;
+      margin-top: 4px;
+    }
+    .top-row {
+      display: flex;
+      justify-content: space-between;
+      gap: 8px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+    input[type="text"], select {
+      padding: 4px 6px;
+      border-radius: 6px;
+      border: 1px solid #374151;
+      background: #020617;
+      color: #e5e7eb;
+      font-size: 12px;
+    }
+  </style>
+</head>
+<body>
+  <div class="top-row">
+    <div>
+      <h1>XL Nice Number Scanner</h1>
+      <div class="small">
+        Paste teks dari halaman XL / file TXT / hasil OCR & filter nomor cantik.
+      </div>
+    </div>
+  </div>
+
+  <div class="panel">
+    <div class="small" style="margin-bottom:4px;">
+      1. Copy semua teks dari halaman XL (atau file lain)<br>
+      2. Paste di bawah 👇
+    </div>
+    <textarea id="rawInput" placeholder="Paste teks mentah di sini..."></textarea>
+    <div class="copy-hint">Tip: di PC bisa copy dari View Source / Inspect; di HP bisa dari share → copy, atau simpan HTML lalu buka.</div>
+  </div>
+
+  <div class="panel">
+    <div style="margin-bottom:6px; font-size:13px; font-weight:600;">Filter</div>
+
+    <div style="margin-bottom:8px;">
+      <div class="small">Prefix (XL / Axis):</div>
+      <div class="flex">
+        <label class="chip"><input type="checkbox" class="prefix" value="0817" checked>0817</label>
+        <label class="chip"><input type="checkbox" class="prefix" value="0818" checked>0818</label>
+        <label class="chip"><input type="checkbox" class="prefix" value="0819" checked>0819</label>
+        <label class="chip"><input type="checkbox" class="prefix" value="0859" checked>0859</label>
+        <label class="chip"><input type="checkbox" class="prefix" value="0877" checked>0877</label>
+        <label class="chip"><input type="checkbox" class="prefix" value="0878" checked>0878</label>
+        <label class="chip"><input type="checkbox" class="prefix" value="0838" checked>0838</label>
+      </div>
+    </div>
+
+    <div style="margin-bottom:8px;">
+      <div class="small">Pola yang diambil:</div>
+      <div class="flex">
+        <label class="chip"><input type="checkbox" class="pattern" value="AAA" checked>AAA (…888)</label>
+        <label class="chip"><input type="checkbox" class="pattern" value="AABB" checked>AABB (…6677)</label>
+        <label class="chip"><input type="checkbox" class="pattern" value="AAABBB" checked>AAABBB (xxxYYY)</label>
+        <label class="chip"><input type="checkbox" class="pattern" value="AABBAA" checked>AABBAA (AABBAA)</label>
+        <label class="chip"><input type="checkbox" class="pattern" value="AAAAA" checked>AAAAA (…88888)</label>
+      </div>
+    </div>
+
+    <div class="flex" style="margin-bottom:8px;">
+      <div>
+        <div class="small">Panjang nomor:</div>
+        <select id="lengthFilter">
+          <option value="any">10–12 (semua)</option>
+          <option value="10">10 digit saja</option>
+          <option value="11">11 digit saja</option>
+          <option value="12">12 digit saja</option>
+        </select>
+      </div>
+      <div>
+        <div class="small">Harus mengandung digit (opsional):</div>
+        <input type="text" id="mustContain" placeholder="misal: 888 / 1234">
+      </div>
+    </div>
+
+    <div class="flex" style="justify-content:space-between; margin-top:4px;">
+      <div>
+        <button id="btnScan">Scan & Filter</button>
+        <button id="btnCopy" class="secondary" disabled>Copy semua hasil</button>
+      </div>
+      <div id="status" class="small"></div>
+    </div>
+  </div>
+
+  <div class="panel" style="margin-bottom:40px;">
+    <div style="font-size:13px; font-weight:600;">Hasil</div>
+    <div class="small" id="resultHint">Belum ada hasil. Klik "Scan & Filter" setelah paste teks.</div>
+    <div style="max-height:300px; overflow:auto; margin-top:4px;">
+      <table id="resultTable" style="display:none;">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Nomor</th>
+            <th>Pattern</th>
+            <th>Panjang</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+    <div class="copy-hint">Klik baris untuk copy satu nomor ke clipboard.</div>
+  </div>
+
+  <script>
+    function extractNumbers(text) {
+      // 08 + 8–10 digit = 10–12 digit total
+      const matches = text.match(/08\d{8,10}/g) || [];
+      return Array.from(new Set(matches));
+    }
+
+    function detectPattern(num) {
+      const last3 = num.slice(-3).split('').map(d => +d);
+      const last4 = num.slice(-4).split('').map(d => +d);
+      const last5 = num.slice(-5).split('').map(d => +d);
+      const last6 = num.slice(-6).split('').map(d => +d);
+
+      // AAABBB (xxxYYY)
+      if (last6.length === 6 &&
+          last6[0] === last6[1] && last6[1] === last6[2] &&
+          last6[3] === last6[4] && last6[4] === last6[5] &&
+          last6[0] !== last6[3]) return 'AAABBB';
+
+      // AABBAA (A A B B A A, A!=B)
+      if (last6.length === 6 &&
+          last6[0] === last6[1] &&
+          last6[2] === last6[3] &&
+          last6[4] === last6[5] &&
+          last6[0] === last6[4] &&
+          last6[0] !== last6[2]) return 'AABBAA';
+
+      // AAAAA
+      if (last5.length === 5 &&
+          last5.every(d => d === last5[0])) return 'AAAAA';
+
+      // AAA
+      if (last3.length === 3 &&
+          last3[0] === last3[1] && last3[1] === last3[2]) return 'AAA';
+
+      // AABB
+      if (last4.length === 4 &&
+          last4[0] === last4[1] &&
+          last4[2] === last4[3] &&
+          last4[0] !== last4[2]) return 'AABB';
+
+      return 'OTHER';
+    }
+
+    function scan() {
+      const raw = document.getElementById('rawInput').value || '';
+      const mustContain = document.getElementById('mustContain').value.trim();
+      const lenFilter = document.getElementById('lengthFilter').value;
+
+      const prefixEls = document.querySelectorAll('.prefix:checked');
+      const prefixes = Array.from(prefixEls).map(el => el.value);
+
+      const patternEls = document.querySelectorAll('.pattern:checked');
+      const patterns = Array.from(patternEls).map(el => el.value);
+
+      const all = extractNumbers(raw);
+      let list = all;
+
+      // filter prefix
+      if (prefixes.length) {
+        list = list.filter(n => prefixes.some(p => n.startsWith(p)));
+      }
+
+      // filter length
+      if (lenFilter !== 'any') {
+        const L = parseInt(lenFilter, 10);
+        list = list.filter(n => n.length === L);
+      }
+
+      // hitung pattern
+      let rows = list.map(n => {
+        const pattern = detectPattern(n);
+        return { number: n, pattern, length: n.length };
+      });
+
+      // filter pattern
+      if (patterns.length) {
+        rows = rows.filter(r => patterns.includes(r.pattern));
+      }
+
+      // must contain
+      if (mustContain) {
+        rows = rows.filter(r => r.number.includes(mustContain));
+      }
+
+      render(rows, all.length);
+    }
+
+    function render(rows, totalAll) {
+      const status = document.getElementById('status');
+      const hint = document.getElementById('resultHint');
+      const table = document.getElementById('resultTable');
+      const tbody = table.querySelector('tbody');
+      const copyBtn = document.getElementById('btnCopy');
+
+      tbody.innerHTML = '';
+
+      if (!rows.length) {
+        table.style.display = 'none';
+        hint.style.display = 'block';
+        hint.textContent = 'Tidak ada nomor yang cocok dengan filter.';
+        status.textContent = `Total nomor yang terdeteksi: ${totalAll} | Cocok filter: 0`;
+        copyBtn.disabled = true;
+        return;
+      }
+
+      rows.forEach((row, idx) => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td>${idx + 1}</td>
+          <td>${row.number}</td>
+          <td><span class="badge">${row.pattern}</span></td>
+          <td>${row.length}</td>
+        `;
+        tr.addEventListener('click', () => {
+          navigator.clipboard.writeText(row.number).then(() => {
+            status.textContent = 'Copied: ' + row.number;
+          }).catch(() => {});
+        });
+        tbody.appendChild(tr);
+      });
+
+      table.style.display = 'table';
+      hint.style.display = 'none';
+      status.textContent = `Total nomor terdeteksi: ${totalAll} | Cocok filter: ${rows.length}`;
+      copyBtn.disabled = false;
+
+      copyBtn.onclick = () => {
+        const allNums = rows.map(r => r.number).join('\n');
+        navigator.clipboard.writeText(allNums).then(() => {
+          status.textContent = `Semua nomor (${rows.length}) sudah di-copy.`;
+        }).catch(() => {});
+      };
+    }
+
+    document.getElementById('btnScan').addEventListener('click', scan);
+  </script>
+</body>
+</html>
